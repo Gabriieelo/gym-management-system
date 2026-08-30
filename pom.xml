@@ -11,21 +11,8 @@
 	<groupId>com.gym</groupId>
 	<artifactId>gym-management-system</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name></name>
-	<description/>
-	<url/>
-	<licenses>
-		<license/>
-	</licenses>
-	<developers>
-		<developer/>
-	</developers>
-	<scm>
-		<connection/>
-		<developerConnection/>
-		<tag/>
-		<url/>
-	</scm>
+	<name>gym-management-system</name>
+	<description>Gym Management System</description>
 	<properties>
 		<java.version>17</java.version>
 	</properties>
@@ -42,7 +29,6 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-webmvc</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>com.mysql</groupId>
 			<artifactId>mysql-connector-j</artifactId>
@@ -114,5 +100,4 @@
 			</plugin>
 		</plugins>
 	</build>
-
 </project>
