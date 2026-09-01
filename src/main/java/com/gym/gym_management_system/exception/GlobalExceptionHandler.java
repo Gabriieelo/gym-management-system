@@ -6,6 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -25,6 +26,39 @@ public class GlobalExceptionHandler {
             DniDuplicadoException exception,
             HttpServletRequest request) {
         return crearRespuesta(HttpStatus.CONFLICT, exception.getMessage(), request.getRequestURI(), Map.of());
+    }
+
+    @ExceptionHandler(PagoNoEncontradoException.class)
+    public ResponseEntity<ApiError> manejarPagoNoEncontrado(
+            PagoNoEncontradoException exception,
+            HttpServletRequest request) {
+        return crearRespuesta(HttpStatus.NOT_FOUND, exception.getMessage(), request.getRequestURI(), Map.of());
+    }
+
+    @ExceptionHandler(PagoDuplicadoException.class)
+    public ResponseEntity<ApiError> manejarPagoDuplicado(
+            PagoDuplicadoException exception,
+            HttpServletRequest request) {
+        return crearRespuesta(HttpStatus.CONFLICT, exception.getMessage(), request.getRequestURI(), Map.of());
+    }
+
+    @ExceptionHandler(ClienteInactivoException.class)
+    public ResponseEntity<ApiError> manejarClienteInactivo(
+            ClienteInactivoException exception,
+            HttpServletRequest request) {
+        return crearRespuesta(HttpStatus.BAD_REQUEST, exception.getMessage(), request.getRequestURI(), Map.of());
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiError> manejarCuerpoInvalido(
+            HttpMessageNotReadableException exception,
+            HttpServletRequest request) {
+        return crearRespuesta(
+                HttpStatus.BAD_REQUEST,
+                "El cuerpo de la solicitud contiene datos inválidos",
+                request.getRequestURI(),
+                Map.of()
+        );
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
