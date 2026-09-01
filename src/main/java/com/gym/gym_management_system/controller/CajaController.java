@@ -3,6 +3,9 @@ package com.gym.gym_management_system.controller;
 import com.gym.gym_management_system.dto.MovimientoCajaRequest;
 import com.gym.gym_management_system.dto.MovimientoCajaResponse;
 import com.gym.gym_management_system.dto.ResumenCajaResponse;
+import com.gym.gym_management_system.dto.CierreCajaRequest;
+import com.gym.gym_management_system.dto.CierreCajaResponse;
+import com.gym.gym_management_system.service.CierreCajaService;
 import com.gym.gym_management_system.service.MovimientoCajaService;
 import jakarta.validation.Valid;
 import java.time.LocalDate;
@@ -23,9 +26,13 @@ import org.springframework.web.bind.annotation.RestController;
 public class CajaController {
 
     private final MovimientoCajaService movimientoCajaService;
+    private final CierreCajaService cierreCajaService;
 
-    public CajaController(MovimientoCajaService movimientoCajaService) {
+    public CajaController(
+            MovimientoCajaService movimientoCajaService,
+            CierreCajaService cierreCajaService) {
         this.movimientoCajaService = movimientoCajaService;
+        this.cierreCajaService = cierreCajaService;
     }
 
     @PostMapping("/movimientos")
@@ -51,5 +58,30 @@ public class CajaController {
     @PatchMapping("/movimientos/{id}/anular")
     public ResponseEntity<MovimientoCajaResponse> anularManual(@PathVariable Long id) {
         return ResponseEntity.ok(movimientoCajaService.anularManual(id));
+    }
+
+    @PostMapping("/cierres")
+    public ResponseEntity<CierreCajaResponse> cerrar(
+            @Valid @RequestBody CierreCajaRequest request) {
+        return ResponseEntity.status(201).body(cierreCajaService.cerrar(request));
+    }
+
+    @GetMapping("/cierres")
+    public ResponseEntity<List<CierreCajaResponse>> listarCierres() {
+        return ResponseEntity.ok(cierreCajaService.listar());
+    }
+
+    @GetMapping("/cierres/{fecha}")
+    public ResponseEntity<CierreCajaResponse> buscarCierre(
+            @PathVariable
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha) {
+        return ResponseEntity.ok(cierreCajaService.buscarPorFecha(fecha));
+    }
+
+    @PatchMapping("/cierres/{fecha}/reabrir")
+    public ResponseEntity<CierreCajaResponse> reabrir(
+            @PathVariable
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha) {
+        return ResponseEntity.ok(cierreCajaService.reabrir(fecha));
     }
 }

@@ -19,6 +19,9 @@ import com.gym.gym_management_system.entity.Pago;
 import com.gym.gym_management_system.entity.TipoMovimientoCaja;
 import com.gym.gym_management_system.entity.TipoPago;
 import com.gym.gym_management_system.exception.OperacionCajaInvalidaException;
+import com.gym.gym_management_system.exception.CajaYaCerradaException;
+import com.gym.gym_management_system.entity.EstadoCierreCaja;
+import com.gym.gym_management_system.repository.CierreCajaRepository;
 import com.gym.gym_management_system.repository.MovimientoCajaRepository;
 import java.math.BigDecimal;
 import java.time.Clock;
@@ -40,6 +43,9 @@ class MovimientoCajaServiceTest {
     @Mock
     private MovimientoCajaRepository movimientoRepository;
 
+    @Mock
+    private CierreCajaRepository cierreRepository;
+
     private MovimientoCajaService movimientoService;
 
     @BeforeEach
@@ -48,7 +54,7 @@ class MovimientoCajaServiceTest {
                 Instant.parse("2026-09-15T15:00:00Z"),
                 ZoneId.of("America/Argentina/Buenos_Aires")
         );
-        movimientoService = new MovimientoCajaService(movimientoRepository, reloj);
+        movimientoService = new MovimientoCajaService(movimientoRepository, cierreRepository, reloj);
     }
 
     @Test
@@ -127,6 +133,23 @@ class MovimientoCajaServiceTest {
         when(movimientoRepository.findById(1L)).thenReturn(Optional.of(movimiento));
 
         assertThrows(OperacionCajaInvalidaException.class, () -> movimientoService.anularManual(1L));
+    }
+
+    @Test
+    void impideRegistrarMovimientosCuandoLaCajaEstaCerrada() {
+        LocalDate fecha = LocalDate.of(2026, 9, 15);
+        when(cierreRepository.existsByFechaAndEstado(fecha, EstadoCierreCaja.CERRADO))
+                .thenReturn(true);
+
+        assertThrows(
+                CajaYaCerradaException.class,
+                () -> movimientoService.registrarManual(new MovimientoCajaRequest(
+                        TipoMovimientoCaja.INGRESO,
+                        new BigDecimal("1000.00"),
+                        MedioPago.EFECTIVO,
+                        "Ingreso posterior al cierre"
+                ))
+        );
     }
 
     private Pago crearPago() {

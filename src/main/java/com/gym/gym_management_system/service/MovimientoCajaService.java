@@ -5,6 +5,7 @@ import com.gym.gym_management_system.dto.MovimientoCajaResponse;
 import com.gym.gym_management_system.dto.ResumenCajaResponse;
 import com.gym.gym_management_system.entity.Cliente;
 import com.gym.gym_management_system.entity.EstadoMovimientoCaja;
+import com.gym.gym_management_system.entity.EstadoCierreCaja;
 import com.gym.gym_management_system.entity.MovimientoCaja;
 import com.gym.gym_management_system.entity.MedioPago;
 import com.gym.gym_management_system.entity.OrigenMovimientoCaja;
@@ -12,8 +13,10 @@ import com.gym.gym_management_system.entity.Pago;
 import com.gym.gym_management_system.entity.TipoMovimientoCaja;
 import com.gym.gym_management_system.entity.TipoPago;
 import com.gym.gym_management_system.exception.MovimientoCajaNoEncontradoException;
+import com.gym.gym_management_system.exception.CajaYaCerradaException;
 import com.gym.gym_management_system.exception.OperacionCajaInvalidaException;
 import com.gym.gym_management_system.repository.MovimientoCajaRepository;
+import com.gym.gym_management_system.repository.CierreCajaRepository;
 import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.LocalDate;
@@ -27,26 +30,34 @@ import org.springframework.transaction.annotation.Transactional;
 public class MovimientoCajaService {
 
     private final MovimientoCajaRepository movimientoRepository;
+    private final CierreCajaRepository cierreRepository;
     private final Clock reloj;
 
-    public MovimientoCajaService(MovimientoCajaRepository movimientoRepository, Clock reloj) {
+    public MovimientoCajaService(
+            MovimientoCajaRepository movimientoRepository,
+            CierreCajaRepository cierreRepository,
+            Clock reloj) {
         this.movimientoRepository = movimientoRepository;
+        this.cierreRepository = cierreRepository;
         this.reloj = reloj;
     }
 
     public MovimientoCajaResponse registrarManual(MovimientoCajaRequest request) {
+        LocalDateTime ahora = LocalDateTime.now(reloj);
+        validarCajaAbierta(ahora.toLocalDate());
         MovimientoCaja movimiento = new MovimientoCaja();
         movimiento.setTipo(request.tipo());
         movimiento.setOrigen(OrigenMovimientoCaja.MANUAL);
         movimiento.setEstado(EstadoMovimientoCaja.ACTIVO);
         movimiento.setMonto(request.monto());
         movimiento.setMedioPago(request.medioPago());
-        movimiento.setFechaHora(LocalDateTime.now(reloj));
+        movimiento.setFechaHora(ahora);
         movimiento.setDescripcion(request.descripcion().trim());
         return convertirAResponse(movimientoRepository.save(movimiento));
     }
 
     public void registrarDesdePago(Pago pago) {
+        validarCajaAbierta(pago.getFechaPago().toLocalDate());
         if (movimientoRepository.existsByPagoId(pago.getId())) {
             throw new OperacionCajaInvalidaException("El pago ya tiene un movimiento de caja asociado");
         }
@@ -65,6 +76,7 @@ public class MovimientoCajaService {
 
     public MovimientoCajaResponse anularManual(Long id) {
         MovimientoCaja movimiento = buscar(id);
+        validarCajaAbierta(movimiento.getFechaHora().toLocalDate());
         if (movimiento.getOrigen() == OrigenMovimientoCaja.PAGO) {
             throw new OperacionCajaInvalidaException(
                     "Los movimientos originados por pagos deben anularse desde el pago"
@@ -76,6 +88,7 @@ public class MovimientoCajaService {
 
     public void anularPorPago(Long pagoId) {
         movimientoRepository.findByPagoId(pagoId).ifPresent(movimiento -> {
+            validarCajaAbierta(movimiento.getFechaHora().toLocalDate());
             movimiento.setEstado(EstadoMovimientoCaja.ANULADO);
             movimientoRepository.save(movimiento);
         });
@@ -127,6 +140,12 @@ public class MovimientoCajaService {
     private MovimientoCaja buscar(Long id) {
         return movimientoRepository.findById(id)
                 .orElseThrow(() -> new MovimientoCajaNoEncontradoException(id));
+    }
+
+    private void validarCajaAbierta(LocalDate fecha) {
+        if (cierreRepository.existsByFechaAndEstado(fecha, EstadoCierreCaja.CERRADO)) {
+            throw new CajaYaCerradaException(fecha);
+        }
     }
 
     private List<MovimientoCaja> buscarMovimientos(LocalDate fecha) {
