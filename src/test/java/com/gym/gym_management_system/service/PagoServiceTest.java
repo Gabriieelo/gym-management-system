@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
 
 import com.gym.gym_management_system.dto.PagoRequest;
 import com.gym.gym_management_system.dto.PagoResponse;
@@ -39,6 +40,9 @@ class PagoServiceTest {
     @Mock
     private ClienteRepository clienteRepository;
 
+    @Mock
+    private MovimientoCajaService movimientoCajaService;
+
     private PagoService pagoService;
     private Cliente cliente;
 
@@ -49,6 +53,7 @@ class PagoServiceTest {
                 pagoRepository,
                 clienteRepository,
                 new CalculadorTarifa(),
+                movimientoCajaService,
                 reloj
         );
 
@@ -75,6 +80,7 @@ class PagoServiceTest {
         assertEquals(2026, response.periodoAnio());
         assertNull(response.fechaUso());
         assertEquals(EstadoPago.CONFIRMADO, response.estado());
+        verify(movimientoCajaService).registrarDesdePago(any(Pago.class));
     }
 
     @Test

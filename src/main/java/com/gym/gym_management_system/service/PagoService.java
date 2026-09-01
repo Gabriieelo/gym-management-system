@@ -28,16 +28,19 @@ public class PagoService {
     private final PagoRepository pagoRepository;
     private final ClienteRepository clienteRepository;
     private final CalculadorTarifa calculadorTarifa;
+    private final MovimientoCajaService movimientoCajaService;
     private final Clock reloj;
 
     public PagoService(
             PagoRepository pagoRepository,
             ClienteRepository clienteRepository,
             CalculadorTarifa calculadorTarifa,
+            MovimientoCajaService movimientoCajaService,
             Clock reloj) {
         this.pagoRepository = pagoRepository;
         this.clienteRepository = clienteRepository;
         this.calculadorTarifa = calculadorTarifa;
+        this.movimientoCajaService = movimientoCajaService;
         this.reloj = reloj;
     }
 
@@ -66,7 +69,9 @@ public class PagoService {
             pago.setFechaUso(fechaActual);
         }
 
-        return convertirAResponse(pagoRepository.save(pago));
+        Pago pagoGuardado = pagoRepository.save(pago);
+        movimientoCajaService.registrarDesdePago(pagoGuardado);
+        return convertirAResponse(pagoGuardado);
     }
 
     @Transactional(readOnly = true)
@@ -109,7 +114,9 @@ public class PagoService {
         Pago pago = pagoRepository.findById(id)
                 .orElseThrow(() -> new PagoNoEncontradoException(id));
         pago.setEstado(EstadoPago.ANULADO);
-        return convertirAResponse(pagoRepository.save(pago));
+        Pago pagoAnulado = pagoRepository.save(pago);
+        movimientoCajaService.anularPorPago(pagoAnulado.getId());
+        return convertirAResponse(pagoAnulado);
     }
 
     private Cliente buscarCliente(Long id) {
