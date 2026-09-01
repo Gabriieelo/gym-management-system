@@ -6,6 +6,7 @@ import com.gym.gym_management_system.dto.ResumenCajaResponse;
 import com.gym.gym_management_system.entity.Cliente;
 import com.gym.gym_management_system.entity.EstadoMovimientoCaja;
 import com.gym.gym_management_system.entity.MovimientoCaja;
+import com.gym.gym_management_system.entity.MedioPago;
 import com.gym.gym_management_system.entity.OrigenMovimientoCaja;
 import com.gym.gym_management_system.entity.Pago;
 import com.gym.gym_management_system.entity.TipoMovimientoCaja;
@@ -39,6 +40,7 @@ public class MovimientoCajaService {
         movimiento.setOrigen(OrigenMovimientoCaja.MANUAL);
         movimiento.setEstado(EstadoMovimientoCaja.ACTIVO);
         movimiento.setMonto(request.monto());
+        movimiento.setMedioPago(request.medioPago());
         movimiento.setFechaHora(LocalDateTime.now(reloj));
         movimiento.setDescripcion(request.descripcion().trim());
         return convertirAResponse(movimientoRepository.save(movimiento));
@@ -54,6 +56,7 @@ public class MovimientoCajaService {
         movimiento.setOrigen(OrigenMovimientoCaja.PAGO);
         movimiento.setEstado(EstadoMovimientoCaja.ACTIVO);
         movimiento.setMonto(pago.getMonto());
+        movimiento.setMedioPago(pago.getMedioPago());
         movimiento.setFechaHora(pago.getFechaPago());
         movimiento.setDescripcion(describirPago(pago));
         movimiento.setPago(pago);
@@ -92,6 +95,14 @@ public class MovimientoCajaService {
 
         BigDecimal ingresos = sumar(movimientos, TipoMovimientoCaja.INGRESO);
         BigDecimal egresos = sumar(movimientos, TipoMovimientoCaja.EGRESO);
+        BigDecimal ingresosEfectivo = sumar(
+                movimientos, TipoMovimientoCaja.INGRESO, MedioPago.EFECTIVO);
+        BigDecimal ingresosTransferencia = sumar(
+                movimientos, TipoMovimientoCaja.INGRESO, MedioPago.TRANSFERENCIA);
+        BigDecimal egresosEfectivo = sumar(
+                movimientos, TipoMovimientoCaja.EGRESO, MedioPago.EFECTIVO);
+        BigDecimal egresosTransferencia = sumar(
+                movimientos, TipoMovimientoCaja.EGRESO, MedioPago.TRANSFERENCIA);
         long activos = movimientos.stream()
                 .filter(movimiento -> movimiento.getEstado() == EstadoMovimientoCaja.ACTIVO)
                 .count();
@@ -100,8 +111,14 @@ public class MovimientoCajaService {
         return new ResumenCajaResponse(
                 dia,
                 ingresos,
+                ingresosEfectivo,
+                ingresosTransferencia,
                 egresos,
+                egresosEfectivo,
+                egresosTransferencia,
                 ingresos.subtract(egresos),
+                ingresosEfectivo.subtract(egresosEfectivo),
+                ingresosTransferencia.subtract(egresosTransferencia),
                 activos,
                 anulados
         );
@@ -129,6 +146,18 @@ public class MovimientoCajaService {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
+    private BigDecimal sumar(
+            List<MovimientoCaja> movimientos,
+            TipoMovimientoCaja tipo,
+            MedioPago medioPago) {
+        return movimientos.stream()
+                .filter(movimiento -> movimiento.getEstado() == EstadoMovimientoCaja.ACTIVO)
+                .filter(movimiento -> movimiento.getTipo() == tipo)
+                .filter(movimiento -> movimiento.getMedioPago() == medioPago)
+                .map(MovimientoCaja::getMonto)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
     private String describirPago(Pago pago) {
         Cliente cliente = pago.getCliente();
         String nombre = cliente.getNombre() + " " + cliente.getApellido();
@@ -147,6 +176,7 @@ public class MovimientoCajaService {
                 movimiento.getOrigen(),
                 movimiento.getEstado(),
                 movimiento.getMonto(),
+                movimiento.getMedioPago(),
                 movimiento.getFechaHora(),
                 movimiento.getDescripcion(),
                 pago != null ? pago.getId() : null,

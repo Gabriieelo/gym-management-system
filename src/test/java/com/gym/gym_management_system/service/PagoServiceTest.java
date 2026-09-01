@@ -11,6 +11,7 @@ import com.gym.gym_management_system.dto.PagoRequest;
 import com.gym.gym_management_system.dto.PagoResponse;
 import com.gym.gym_management_system.entity.Cliente;
 import com.gym.gym_management_system.entity.EstadoPago;
+import com.gym.gym_management_system.entity.MedioPago;
 import com.gym.gym_management_system.entity.Pago;
 import com.gym.gym_management_system.entity.TipoPago;
 import com.gym.gym_management_system.exception.ClienteInactivoException;
@@ -73,13 +74,15 @@ class PagoServiceTest {
             return pago;
         });
 
-        PagoResponse response = pagoService.registrar(new PagoRequest(1L, TipoPago.MENSUAL, null));
+        PagoResponse response = pagoService.registrar(
+                new PagoRequest(1L, TipoPago.MENSUAL, MedioPago.EFECTIVO, null));
 
         assertEquals(new BigDecimal("38000.00"), response.monto());
         assertEquals(9, response.periodoMes());
         assertEquals(2026, response.periodoAnio());
         assertNull(response.fechaUso());
         assertEquals(EstadoPago.CONFIRMADO, response.estado());
+        assertEquals(MedioPago.EFECTIVO, response.medioPago());
         verify(movimientoCajaService).registrarDesdePago(any(Pago.class));
     }
 
@@ -87,11 +90,13 @@ class PagoServiceTest {
     void registraUnPaseParaElDiaActual() {
         when(pagoRepository.save(any(Pago.class))).thenAnswer(invocacion -> invocacion.getArgument(0));
 
-        PagoResponse response = pagoService.registrar(new PagoRequest(1L, TipoPago.PASE_DIARIO, " Efectivo "));
+        PagoResponse response = pagoService.registrar(
+                new PagoRequest(1L, TipoPago.PASE_DIARIO, MedioPago.TRANSFERENCIA, " Comprobante 123 "));
 
         assertEquals(new BigDecimal("4000.00"), response.monto());
         assertEquals(LocalDate.of(2026, 9, 10), response.fechaUso());
-        assertEquals("Efectivo", response.observacion());
+        assertEquals("Comprobante 123", response.observacion());
+        assertEquals(MedioPago.TRANSFERENCIA, response.medioPago());
         assertNull(response.periodoMes());
     }
 
@@ -103,7 +108,8 @@ class PagoServiceTest {
 
         assertThrows(
                 PagoDuplicadoException.class,
-                () -> pagoService.registrar(new PagoRequest(1L, TipoPago.MENSUAL, null))
+                () -> pagoService.registrar(
+                        new PagoRequest(1L, TipoPago.MENSUAL, MedioPago.EFECTIVO, null))
         );
     }
 
@@ -113,7 +119,8 @@ class PagoServiceTest {
 
         assertThrows(
                 ClienteInactivoException.class,
-                () -> pagoService.registrar(new PagoRequest(1L, TipoPago.PASE_DIARIO, null))
+                () -> pagoService.registrar(
+                        new PagoRequest(1L, TipoPago.PASE_DIARIO, MedioPago.EFECTIVO, null))
         );
     }
 }
