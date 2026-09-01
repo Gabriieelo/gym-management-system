@@ -35,6 +35,20 @@ public class GlobalExceptionHandler {
         return crearRespuesta(HttpStatus.NOT_FOUND, exception.getMessage(), request.getRequestURI(), Map.of());
     }
 
+    @ExceptionHandler(MovimientoCajaNoEncontradoException.class)
+    public ResponseEntity<ApiError> manejarMovimientoNoEncontrado(
+            MovimientoCajaNoEncontradoException exception,
+            HttpServletRequest request) {
+        return crearRespuesta(HttpStatus.NOT_FOUND, exception.getMessage(), request.getRequestURI(), Map.of());
+    }
+
+    @ExceptionHandler(OperacionCajaInvalidaException.class)
+    public ResponseEntity<ApiError> manejarOperacionCajaInvalida(
+            OperacionCajaInvalidaException exception,
+            HttpServletRequest request) {
+        return crearRespuesta(HttpStatus.CONFLICT, exception.getMessage(), request.getRequestURI(), Map.of());
+    }
+
     @ExceptionHandler(PagoDuplicadoException.class)
     public ResponseEntity<ApiError> manejarPagoDuplicado(
             PagoDuplicadoException exception,

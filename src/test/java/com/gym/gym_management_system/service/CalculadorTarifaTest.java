@@ -31,4 +31,18 @@ class CalculadorTarifaTest {
 
         assertEquals(new BigDecimal("4000.00"), monto);
     }
+
+    @Test
+    void extiendeElPagoSinRecargoAlLunesCuandoElDiaDiezEsDomingo() {
+        BigDecimal monto = calculador.calcular(TipoPago.MENSUAL, LocalDate.of(2026, 5, 11));
+
+        assertEquals(new BigDecimal("38000.00"), monto);
+    }
+
+    @Test
+    void aplicaElRecargoLuegoDelLunesDeProrroga() {
+        BigDecimal monto = calculador.calcular(TipoPago.MENSUAL, LocalDate.of(2026, 5, 12));
+
+        assertEquals(new BigDecimal("42000.00"), monto);
+    }
 }
