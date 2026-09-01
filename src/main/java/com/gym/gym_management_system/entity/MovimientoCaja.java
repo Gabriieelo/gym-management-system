@@ -41,6 +41,10 @@ public class MovimientoCaja {
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal monto;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private MedioPago medioPago;
+
     @Column(nullable = false)
     private LocalDateTime fechaHora;
 

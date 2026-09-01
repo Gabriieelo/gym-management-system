@@ -59,6 +59,7 @@ public class PagoService {
         pago.setTipo(request.tipo());
         pago.setEstado(EstadoPago.CONFIRMADO);
         pago.setMonto(calculadorTarifa.calcular(request.tipo(), fechaActual));
+        pago.setMedioPago(request.medioPago());
         pago.setFechaPago(ahora);
         pago.setObservacion(limpiarTexto(request.observacion()));
 
@@ -165,6 +166,7 @@ public class PagoService {
                 pago.getTipo(),
                 pago.getEstado(),
                 pago.getMonto(),
+                pago.getMedioPago(),
                 pago.getFechaPago(),
                 pago.getPeriodoMes(),
                 pago.getPeriodoAnio(),

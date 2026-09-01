@@ -13,6 +13,7 @@ import com.gym.gym_management_system.dto.ResumenCajaResponse;
 import com.gym.gym_management_system.entity.Cliente;
 import com.gym.gym_management_system.entity.EstadoMovimientoCaja;
 import com.gym.gym_management_system.entity.MovimientoCaja;
+import com.gym.gym_management_system.entity.MedioPago;
 import com.gym.gym_management_system.entity.OrigenMovimientoCaja;
 import com.gym.gym_management_system.entity.Pago;
 import com.gym.gym_management_system.entity.TipoMovimientoCaja;
@@ -59,12 +60,14 @@ class MovimientoCajaServiceTest {
                 new MovimientoCajaRequest(
                         TipoMovimientoCaja.EGRESO,
                         new BigDecimal("5000.00"),
+                        MedioPago.EFECTIVO,
                         " Compra de productos de limpieza "
                 )
         );
 
         assertEquals(OrigenMovimientoCaja.MANUAL, response.origen());
         assertEquals(EstadoMovimientoCaja.ACTIVO, response.estado());
+        assertEquals(MedioPago.EFECTIVO, response.medioPago());
         assertEquals("Compra de productos de limpieza", response.descripcion());
         assertNull(response.pagoId());
     }
@@ -86,9 +89,15 @@ class MovimientoCajaServiceTest {
                         fecha.atStartOfDay(), fecha.plusDays(1).atStartOfDay()
                 ))
                 .thenReturn(List.of(
-                        crearMovimiento(TipoMovimientoCaja.INGRESO, "38000.00", EstadoMovimientoCaja.ACTIVO),
-                        crearMovimiento(TipoMovimientoCaja.EGRESO, "5000.00", EstadoMovimientoCaja.ACTIVO),
-                        crearMovimiento(TipoMovimientoCaja.INGRESO, "4000.00", EstadoMovimientoCaja.ANULADO)
+                        crearMovimiento(
+                                TipoMovimientoCaja.INGRESO, "38000.00",
+                                MedioPago.EFECTIVO, EstadoMovimientoCaja.ACTIVO),
+                        crearMovimiento(
+                                TipoMovimientoCaja.EGRESO, "5000.00",
+                                MedioPago.TRANSFERENCIA, EstadoMovimientoCaja.ACTIVO),
+                        crearMovimiento(
+                                TipoMovimientoCaja.INGRESO, "4000.00",
+                                MedioPago.TRANSFERENCIA, EstadoMovimientoCaja.ANULADO)
                 ));
 
         ResumenCajaResponse resumen = movimientoService.obtenerResumen(fecha);
@@ -96,6 +105,12 @@ class MovimientoCajaServiceTest {
         assertEquals(new BigDecimal("38000.00"), resumen.totalIngresos());
         assertEquals(new BigDecimal("5000.00"), resumen.totalEgresos());
         assertEquals(new BigDecimal("33000.00"), resumen.saldo());
+        assertEquals(new BigDecimal("38000.00"), resumen.ingresosEfectivo());
+        assertEquals(BigDecimal.ZERO, resumen.ingresosTransferencia());
+        assertEquals(BigDecimal.ZERO, resumen.egresosEfectivo());
+        assertEquals(new BigDecimal("5000.00"), resumen.egresosTransferencia());
+        assertEquals(new BigDecimal("38000.00"), resumen.saldoEfectivo());
+        assertEquals(new BigDecimal("-5000.00"), resumen.saldoTransferencia());
         assertEquals(2, resumen.movimientosActivos());
         assertEquals(1, resumen.movimientosAnulados());
     }
@@ -105,6 +120,7 @@ class MovimientoCajaServiceTest {
         MovimientoCaja movimiento = crearMovimiento(
                 TipoMovimientoCaja.INGRESO,
                 "38000.00",
+                MedioPago.EFECTIVO,
                 EstadoMovimientoCaja.ACTIVO
         );
         movimiento.setOrigen(OrigenMovimientoCaja.PAGO);
@@ -124,6 +140,7 @@ class MovimientoCajaServiceTest {
         pago.setCliente(cliente);
         pago.setTipo(TipoPago.MENSUAL);
         pago.setMonto(new BigDecimal("42000.00"));
+        pago.setMedioPago(MedioPago.TRANSFERENCIA);
         pago.setFechaPago(LocalDateTime.of(2026, 9, 15, 12, 0));
         pago.setPeriodoMes(9);
         pago.setPeriodoAnio(2026);
@@ -133,6 +150,7 @@ class MovimientoCajaServiceTest {
     private MovimientoCaja crearMovimiento(
             TipoMovimientoCaja tipo,
             String monto,
+            MedioPago medioPago,
             EstadoMovimientoCaja estado) {
         MovimientoCaja movimiento = new MovimientoCaja();
         movimiento.setId(1L);
@@ -140,6 +158,7 @@ class MovimientoCajaServiceTest {
         movimiento.setOrigen(OrigenMovimientoCaja.MANUAL);
         movimiento.setEstado(estado);
         movimiento.setMonto(new BigDecimal(monto));
+        movimiento.setMedioPago(medioPago);
         movimiento.setFechaHora(LocalDateTime.of(2026, 9, 15, 12, 0));
         movimiento.setDescripcion("Movimiento de prueba");
         return movimiento;
