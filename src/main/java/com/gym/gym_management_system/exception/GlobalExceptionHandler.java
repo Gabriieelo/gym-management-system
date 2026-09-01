@@ -63,6 +63,27 @@ public class GlobalExceptionHandler {
         return crearRespuesta(HttpStatus.BAD_REQUEST, exception.getMessage(), request.getRequestURI(), Map.of());
     }
 
+    @ExceptionHandler(AsistenciaNoEncontradaException.class)
+    public ResponseEntity<ApiError> manejarAsistenciaNoEncontrada(
+            AsistenciaNoEncontradaException exception,
+            HttpServletRequest request) {
+        return crearRespuesta(HttpStatus.NOT_FOUND, exception.getMessage(), request.getRequestURI(), Map.of());
+    }
+
+    @ExceptionHandler(AsistenciaDuplicadaException.class)
+    public ResponseEntity<ApiError> manejarAsistenciaDuplicada(
+            AsistenciaDuplicadaException exception,
+            HttpServletRequest request) {
+        return crearRespuesta(HttpStatus.CONFLICT, exception.getMessage(), request.getRequestURI(), Map.of());
+    }
+
+    @ExceptionHandler(AccesoNoHabilitadoException.class)
+    public ResponseEntity<ApiError> manejarAccesoNoHabilitado(
+            AccesoNoHabilitadoException exception,
+            HttpServletRequest request) {
+        return crearRespuesta(HttpStatus.FORBIDDEN, exception.getMessage(), request.getRequestURI(), Map.of());
+    }
+
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ApiError> manejarCuerpoInvalido(
             HttpMessageNotReadableException exception,
