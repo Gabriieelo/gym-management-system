@@ -44,4 +44,11 @@ public interface PagoRepository extends JpaRepository<Pago, Long> {
             TipoPago tipo,
             EstadoPago estado
     );
+
+    long countByTipoAndEstadoAndFechaPagoGreaterThanEqualAndFechaPagoLessThan(
+            TipoPago tipo,
+            EstadoPago estado,
+            LocalDateTime desde,
+            LocalDateTime hasta
+    );
 }

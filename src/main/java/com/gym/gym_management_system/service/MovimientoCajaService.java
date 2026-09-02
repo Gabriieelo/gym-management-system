@@ -145,6 +145,17 @@ public class MovimientoCajaService {
         );
     }
 
+    @Transactional(readOnly = true)
+    public BigDecimal obtenerIngresosEntre(LocalDateTime desde, LocalDateTime hasta) {
+        return movimientoRepository
+                .findByFechaHoraGreaterThanEqualAndFechaHoraLessThanOrderByFechaHoraAsc(desde, hasta)
+                .stream()
+                .filter(movimiento -> movimiento.getEstado() == EstadoMovimientoCaja.ACTIVO)
+                .filter(movimiento -> movimiento.getTipo() == TipoMovimientoCaja.INGRESO)
+                .map(MovimientoCaja::getMonto)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
     private MovimientoCaja buscar(Long id) {
         return movimientoRepository.findById(id)
                 .orElseThrow(() -> new MovimientoCajaNoEncontradoException(id));

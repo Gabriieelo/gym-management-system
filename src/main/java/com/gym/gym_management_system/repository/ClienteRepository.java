@@ -12,4 +12,6 @@ public interface ClienteRepository extends JpaRepository<Cliente, Long> {
     boolean existsByDni(String dni);
 
     List<Cliente> findByActivo(boolean activo);
+
+    long countByActivo(boolean activo);
 }
