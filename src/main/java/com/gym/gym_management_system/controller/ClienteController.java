@@ -3,7 +3,9 @@ package com.gym.gym_management_system.controller;
 import com.gym.gym_management_system.dto.ClienteRequest;
 import com.gym.gym_management_system.dto.ClienteResponse;
 import com.gym.gym_management_system.dto.EstadoClienteRequest;
+import com.gym.gym_management_system.dto.EstadoCuotaResponse;
 import com.gym.gym_management_system.service.ClienteService;
+import com.gym.gym_management_system.service.EstadoCuotaService;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
@@ -24,9 +26,16 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 public class ClienteController {
 
     private final ClienteService clienteService;
+    private final EstadoCuotaService estadoCuotaService;
 
-    public ClienteController(ClienteService clienteService) {
+    public ClienteController(ClienteService clienteService, EstadoCuotaService estadoCuotaService) {
         this.clienteService = clienteService;
+        this.estadoCuotaService = estadoCuotaService;
+    }
+
+    @GetMapping("/cuotas/vencidas")
+    public ResponseEntity<List<EstadoCuotaResponse>> listarCuotasVencidas() {
+        return ResponseEntity.ok(estadoCuotaService.listarVencidas());
     }
 
     @PostMapping

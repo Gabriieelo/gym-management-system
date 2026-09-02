@@ -25,8 +25,8 @@ public class CalculadorTarifa {
                 : CUOTA_CON_RECARGO;
     }
 
-    private LocalDate calcularLimiteSinRecargo(LocalDate fechaPago) {
-        LocalDate diaDiez = fechaPago.withDayOfMonth(DIA_LIMITE_NORMAL);
+    public LocalDate calcularLimiteSinRecargo(LocalDate fecha) {
+        LocalDate diaDiez = fecha.withDayOfMonth(DIA_LIMITE_NORMAL);
         return diaDiez.getDayOfWeek() == DayOfWeek.SUNDAY
                 ? diaDiez.plusDays(1)
                 : diaDiez;

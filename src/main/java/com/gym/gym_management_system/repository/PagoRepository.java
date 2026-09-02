@@ -6,6 +6,7 @@ import com.gym.gym_management_system.entity.TipoPago;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface PagoRepository extends JpaRepository<Pago, Long> {
@@ -34,6 +35,12 @@ public interface PagoRepository extends JpaRepository<Pago, Long> {
 
     List<Pago> findByFechaUsoAndTipoAndEstadoOrderByFechaPagoAsc(
             LocalDate fechaUso,
+            TipoPago tipo,
+            EstadoPago estado
+    );
+
+    Optional<Pago> findFirstByClienteIdAndTipoAndEstadoOrderByPeriodoAnioDescPeriodoMesDesc(
+            Long clienteId,
             TipoPago tipo,
             EstadoPago estado
     );
