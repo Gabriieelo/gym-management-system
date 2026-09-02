@@ -45,7 +45,7 @@ class ClienteBusquedaServiceTest {
                 Instant.parse("2026-09-15T15:00:00Z"),
                 ZoneId.of("America/Argentina/Buenos_Aires"));
         busquedaService = new ClienteBusquedaService(
-                clienteRepository, estadoCuotaService, new CalculadorTarifa(), reloj);
+                clienteRepository, estadoCuotaService, new CalculadorTarifa(TarifasPrueba.servicio()), reloj);
     }
 
     @Test

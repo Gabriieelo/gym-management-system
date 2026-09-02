@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 
 class CalculadorTarifaTest {
 
-    private final CalculadorTarifa calculador = new CalculadorTarifa();
+    private final CalculadorTarifa calculador = new CalculadorTarifa(TarifasPrueba.servicio());
 
     @Test
     void cobraCuotaNormalHastaElDiaDiezInclusive() {

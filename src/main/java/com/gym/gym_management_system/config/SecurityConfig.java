@@ -49,6 +49,7 @@ public class SecurityConfig {
                                 "/v3/api-docs/**"
                         ).permitAll()
                         .requestMatchers("/api/usuarios/**").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/api/tarifas").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/api/pagos/*/anular").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/api/caja/movimientos/*/anular").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/api/caja/cierres/*/reabrir").hasRole("ADMIN")

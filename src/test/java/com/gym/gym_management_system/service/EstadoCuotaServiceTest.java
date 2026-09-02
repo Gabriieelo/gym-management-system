@@ -120,6 +120,6 @@ class EstadoCuotaServiceTest {
         lenient().when(clienteRepository.findById(1L)).thenReturn(Optional.of(cliente));
         Clock reloj = Clock.fixed(Instant.parse(instante), ZONA);
         return new EstadoCuotaService(
-                clienteRepository, pagoRepository, new CalculadorTarifa(), reloj);
+                clienteRepository, pagoRepository, new CalculadorTarifa(TarifasPrueba.servicio()), reloj);
     }
 }

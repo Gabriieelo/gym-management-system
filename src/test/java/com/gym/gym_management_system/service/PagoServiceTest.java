@@ -60,7 +60,7 @@ class PagoServiceTest {
         pagoService = new PagoService(
                 pagoRepository,
                 clienteRepository,
-                new CalculadorTarifa(),
+                new CalculadorTarifa(TarifasPrueba.servicio()),
                 movimientoCajaService,
                 usuarioActualService,
                 estadoCuotaService,
