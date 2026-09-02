@@ -55,7 +55,7 @@ public class EstadoCuotaService {
                 .toList();
     }
 
-    private EstadoCuotaResponse calcularEstado(Cliente cliente) {
+    EstadoCuotaResponse calcularEstado(Cliente cliente) {
         LocalDate hoy = LocalDate.now(reloj);
         YearMonth periodoActual = YearMonth.from(hoy);
         LocalDate fechaLimite = calculadorTarifa.calcularLimiteSinRecargo(hoy);
