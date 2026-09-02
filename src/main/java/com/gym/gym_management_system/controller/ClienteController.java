@@ -2,11 +2,17 @@ package com.gym.gym_management_system.controller;
 
 import com.gym.gym_management_system.dto.ClienteRequest;
 import com.gym.gym_management_system.dto.ClienteResponse;
+import com.gym.gym_management_system.dto.ClienteBusquedaResponse;
 import com.gym.gym_management_system.dto.EstadoClienteRequest;
 import com.gym.gym_management_system.dto.EstadoCuotaResponse;
+import com.gym.gym_management_system.dto.PaginaResponse;
+import com.gym.gym_management_system.entity.EstadoCuota;
+import com.gym.gym_management_system.service.ClienteBusquedaService;
 import com.gym.gym_management_system.service.ClienteService;
 import com.gym.gym_management_system.service.EstadoCuotaService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import java.net.URI;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
@@ -19,18 +25,36 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
 @RequestMapping("/api/clientes")
+@Validated
 public class ClienteController {
 
     private final ClienteService clienteService;
     private final EstadoCuotaService estadoCuotaService;
+    private final ClienteBusquedaService clienteBusquedaService;
 
-    public ClienteController(ClienteService clienteService, EstadoCuotaService estadoCuotaService) {
+    public ClienteController(
+            ClienteService clienteService,
+            EstadoCuotaService estadoCuotaService,
+            ClienteBusquedaService clienteBusquedaService) {
         this.clienteService = clienteService;
         this.estadoCuotaService = estadoCuotaService;
+        this.clienteBusquedaService = clienteBusquedaService;
+    }
+
+    @GetMapping("/busqueda")
+    public ResponseEntity<PaginaResponse<ClienteBusquedaResponse>> buscar(
+            @RequestParam(required = false) String texto,
+            @RequestParam(required = false) Boolean activo,
+            @RequestParam(required = false) EstadoCuota estadoCuota,
+            @RequestParam(defaultValue = "0") @Min(0) int pagina,
+            @RequestParam(defaultValue = "20") @Min(1) @Max(100) int tamanio) {
+        return ResponseEntity.ok(
+                clienteBusquedaService.buscar(texto, activo, estadoCuota, pagina, tamanio));
     }
 
     @GetMapping("/cuotas/vencidas")
