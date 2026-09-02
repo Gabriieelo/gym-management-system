@@ -54,4 +54,10 @@ public class MovimientoCaja {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "pago_id", unique = true)
     private Pago pago;
+
+    @Column(length = 50)
+    private String registradoPor;
+
+    @Column(length = 50)
+    private String anuladoPor;
 }

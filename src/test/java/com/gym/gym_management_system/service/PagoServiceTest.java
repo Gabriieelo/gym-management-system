@@ -18,6 +18,7 @@ import com.gym.gym_management_system.exception.ClienteInactivoException;
 import com.gym.gym_management_system.exception.PagoDuplicadoException;
 import com.gym.gym_management_system.repository.ClienteRepository;
 import com.gym.gym_management_system.repository.PagoRepository;
+import com.gym.gym_management_system.security.UsuarioActualService;
 import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.Instant;
@@ -44,6 +45,9 @@ class PagoServiceTest {
     @Mock
     private MovimientoCajaService movimientoCajaService;
 
+    @Mock
+    private UsuarioActualService usuarioActualService;
+
     private PagoService pagoService;
     private Cliente cliente;
 
@@ -55,6 +59,7 @@ class PagoServiceTest {
                 clienteRepository,
                 new CalculadorTarifa(),
                 movimientoCajaService,
+                usuarioActualService,
                 reloj
         );
 

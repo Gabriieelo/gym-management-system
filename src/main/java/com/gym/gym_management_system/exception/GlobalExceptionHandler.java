@@ -10,6 +10,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.security.core.AuthenticationException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -105,6 +106,39 @@ public class GlobalExceptionHandler {
         return crearRespuesta(
                 HttpStatus.BAD_REQUEST,
                 "El cuerpo de la solicitud contiene datos inválidos",
+                request.getRequestURI(),
+                Map.of()
+        );
+    }
+
+    @ExceptionHandler(UsuarioNoEncontradoException.class)
+    public ResponseEntity<ApiError> manejarUsuarioNoEncontrado(
+            UsuarioNoEncontradoException exception,
+            HttpServletRequest request) {
+        return crearRespuesta(HttpStatus.NOT_FOUND, exception.getMessage(), request.getRequestURI(), Map.of());
+    }
+
+    @ExceptionHandler(UsuarioDuplicadoException.class)
+    public ResponseEntity<ApiError> manejarUsuarioDuplicado(
+            UsuarioDuplicadoException exception,
+            HttpServletRequest request) {
+        return crearRespuesta(HttpStatus.CONFLICT, exception.getMessage(), request.getRequestURI(), Map.of());
+    }
+
+    @ExceptionHandler(PasswordActualIncorrectaException.class)
+    public ResponseEntity<ApiError> manejarPasswordIncorrecta(
+            PasswordActualIncorrectaException exception,
+            HttpServletRequest request) {
+        return crearRespuesta(HttpStatus.BAD_REQUEST, exception.getMessage(), request.getRequestURI(), Map.of());
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ApiError> manejarAutenticacion(
+            AuthenticationException exception,
+            HttpServletRequest request) {
+        return crearRespuesta(
+                HttpStatus.UNAUTHORIZED,
+                "Nombre de usuario o contraseña incorrectos",
                 request.getRequestURI(),
                 Map.of()
         );

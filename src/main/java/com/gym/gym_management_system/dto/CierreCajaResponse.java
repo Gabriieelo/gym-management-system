@@ -22,6 +22,8 @@ public record CierreCajaResponse(
         boolean transferenciasCoinciden,
         LocalDateTime fechaHoraCierre,
         LocalDateTime fechaHoraReapertura,
-        String observacion
+        String observacion,
+        String cerradoPor,
+        String reabiertoPor
 ) {
 }

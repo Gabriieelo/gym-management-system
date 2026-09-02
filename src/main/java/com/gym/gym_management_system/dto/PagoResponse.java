@@ -19,6 +19,8 @@ public record PagoResponse(
         Integer periodoMes,
         Integer periodoAnio,
         LocalDate fechaUso,
-        String observacion
+        String observacion,
+        String registradoPor,
+        String anuladoPor
 ) {
 }

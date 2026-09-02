@@ -16,6 +16,7 @@ import com.gym.gym_management_system.exception.ClienteNoEncontradoException;
 import com.gym.gym_management_system.repository.AsistenciaRepository;
 import com.gym.gym_management_system.repository.ClienteRepository;
 import com.gym.gym_management_system.repository.PagoRepository;
+import com.gym.gym_management_system.security.UsuarioActualService;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -31,15 +32,18 @@ public class AsistenciaService {
     private final ClienteRepository clienteRepository;
     private final PagoRepository pagoRepository;
     private final Clock reloj;
+    private final UsuarioActualService usuarioActualService;
 
     public AsistenciaService(
             AsistenciaRepository asistenciaRepository,
             ClienteRepository clienteRepository,
             PagoRepository pagoRepository,
+            UsuarioActualService usuarioActualService,
             Clock reloj) {
         this.asistenciaRepository = asistenciaRepository;
         this.clienteRepository = clienteRepository;
         this.pagoRepository = pagoRepository;
+        this.usuarioActualService = usuarioActualService;
         this.reloj = reloj;
     }
 
@@ -64,6 +68,7 @@ public class AsistenciaService {
         asistencia.setFechaHora(ahora);
         asistencia.setModalidad(modalidad);
         asistencia.setEstado(EstadoAsistencia.REGISTRADA);
+        asistencia.setRegistradoPor(usuarioActualService.obtenerNombreUsuario());
         return convertirAResponse(asistenciaRepository.save(asistencia));
     }
 
@@ -89,6 +94,7 @@ public class AsistenciaService {
         Asistencia asistencia = asistenciaRepository.findById(id)
                 .orElseThrow(() -> new AsistenciaNoEncontradaException(id));
         asistencia.setEstado(EstadoAsistencia.ANULADA);
+        asistencia.setAnuladoPor(usuarioActualService.obtenerNombreUsuario());
         return convertirAResponse(asistenciaRepository.save(asistencia));
     }
 
@@ -132,7 +138,9 @@ public class AsistenciaService {
                 asistencia.getFecha(),
                 asistencia.getFechaHora(),
                 asistencia.getModalidad(),
-                asistencia.getEstado()
+                asistencia.getEstado(),
+                asistencia.getRegistradoPor(),
+                asistencia.getAnuladoPor()
         );
     }
 }

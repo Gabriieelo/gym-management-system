@@ -22,6 +22,7 @@ import com.gym.gym_management_system.exception.OperacionCajaInvalidaException;
 import com.gym.gym_management_system.exception.CajaYaCerradaException;
 import com.gym.gym_management_system.entity.EstadoCierreCaja;
 import com.gym.gym_management_system.repository.CierreCajaRepository;
+import com.gym.gym_management_system.security.UsuarioActualService;
 import com.gym.gym_management_system.repository.MovimientoCajaRepository;
 import java.math.BigDecimal;
 import java.time.Clock;
@@ -46,6 +47,9 @@ class MovimientoCajaServiceTest {
     @Mock
     private CierreCajaRepository cierreRepository;
 
+    @Mock
+    private UsuarioActualService usuarioActualService;
+
     private MovimientoCajaService movimientoService;
 
     @BeforeEach
@@ -54,7 +58,8 @@ class MovimientoCajaServiceTest {
                 Instant.parse("2026-09-15T15:00:00Z"),
                 ZoneId.of("America/Argentina/Buenos_Aires")
         );
-        movimientoService = new MovimientoCajaService(movimientoRepository, cierreRepository, reloj);
+        movimientoService = new MovimientoCajaService(
+                movimientoRepository, cierreRepository, usuarioActualService, reloj);
     }
 
     @Test

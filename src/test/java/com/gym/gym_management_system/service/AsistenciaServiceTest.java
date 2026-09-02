@@ -19,6 +19,7 @@ import com.gym.gym_management_system.exception.ClienteInactivoException;
 import com.gym.gym_management_system.repository.AsistenciaRepository;
 import com.gym.gym_management_system.repository.ClienteRepository;
 import com.gym.gym_management_system.repository.PagoRepository;
+import com.gym.gym_management_system.security.UsuarioActualService;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -44,6 +45,9 @@ class AsistenciaServiceTest {
     @Mock
     private PagoRepository pagoRepository;
 
+    @Mock
+    private UsuarioActualService usuarioActualService;
+
     private AsistenciaService asistenciaService;
     private Cliente cliente;
 
@@ -57,6 +61,7 @@ class AsistenciaServiceTest {
                 asistenciaRepository,
                 clienteRepository,
                 pagoRepository,
+                usuarioActualService,
                 reloj
         );
 

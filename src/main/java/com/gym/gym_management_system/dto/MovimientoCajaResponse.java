@@ -18,6 +18,8 @@ public record MovimientoCajaResponse(
         String descripcion,
         Long pagoId,
         Long clienteId,
-        String cliente
+        String cliente,
+        String registradoPor,
+        String anuladoPor
 ) {
 }
