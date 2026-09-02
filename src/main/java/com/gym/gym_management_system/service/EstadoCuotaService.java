@@ -44,9 +44,14 @@ public class EstadoCuotaService {
     }
 
     public List<EstadoCuotaResponse> listarVencidas() {
+        return listarActivos().stream()
+                .filter(response -> response.estado() == EstadoCuota.VENCIDA)
+                .toList();
+    }
+
+    public List<EstadoCuotaResponse> listarActivos() {
         return clienteRepository.findByActivo(true).stream()
                 .map(this::calcularEstado)
-                .filter(response -> response.estado() == EstadoCuota.VENCIDA)
                 .toList();
     }
 

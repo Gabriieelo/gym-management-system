@@ -17,4 +17,6 @@ public interface AsistenciaRepository extends JpaRepository<Asistencia, Long> {
     List<Asistencia> findByFechaOrderByFechaHoraAsc(LocalDate fecha);
 
     List<Asistencia> findByClienteIdOrderByFechaHoraDesc(Long clienteId);
+
+    long countByFechaAndEstado(LocalDate fecha, EstadoAsistencia estado);
 }
