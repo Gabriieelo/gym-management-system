@@ -13,6 +13,7 @@ import com.gym.gym_management_system.exception.PagoDuplicadoException;
 import com.gym.gym_management_system.exception.PagoNoEncontradoException;
 import com.gym.gym_management_system.repository.ClienteRepository;
 import com.gym.gym_management_system.repository.PagoRepository;
+import com.gym.gym_management_system.security.UsuarioActualService;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -29,6 +30,7 @@ public class PagoService {
     private final ClienteRepository clienteRepository;
     private final CalculadorTarifa calculadorTarifa;
     private final MovimientoCajaService movimientoCajaService;
+    private final UsuarioActualService usuarioActualService;
     private final Clock reloj;
 
     public PagoService(
@@ -36,11 +38,13 @@ public class PagoService {
             ClienteRepository clienteRepository,
             CalculadorTarifa calculadorTarifa,
             MovimientoCajaService movimientoCajaService,
+            UsuarioActualService usuarioActualService,
             Clock reloj) {
         this.pagoRepository = pagoRepository;
         this.clienteRepository = clienteRepository;
         this.calculadorTarifa = calculadorTarifa;
         this.movimientoCajaService = movimientoCajaService;
+        this.usuarioActualService = usuarioActualService;
         this.reloj = reloj;
     }
 
@@ -62,6 +66,7 @@ public class PagoService {
         pago.setMedioPago(request.medioPago());
         pago.setFechaPago(ahora);
         pago.setObservacion(limpiarTexto(request.observacion()));
+        pago.setRegistradoPor(usuarioActualService.obtenerNombreUsuario());
 
         if (request.tipo() == TipoPago.MENSUAL) {
             pago.setPeriodoMes(fechaActual.getMonthValue());
@@ -115,6 +120,7 @@ public class PagoService {
         Pago pago = pagoRepository.findById(id)
                 .orElseThrow(() -> new PagoNoEncontradoException(id));
         pago.setEstado(EstadoPago.ANULADO);
+        pago.setAnuladoPor(usuarioActualService.obtenerNombreUsuario());
         Pago pagoAnulado = pagoRepository.save(pago);
         movimientoCajaService.anularPorPago(pagoAnulado.getId());
         return convertirAResponse(pagoAnulado);
@@ -171,7 +177,9 @@ public class PagoService {
                 pago.getPeriodoMes(),
                 pago.getPeriodoAnio(),
                 pago.getFechaUso(),
-                pago.getObservacion()
+                pago.getObservacion(),
+                pago.getRegistradoPor(),
+                pago.getAnuladoPor()
         );
     }
 }

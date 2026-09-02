@@ -8,6 +8,7 @@ import com.gym.gym_management_system.entity.EstadoCierreCaja;
 import com.gym.gym_management_system.exception.CajaYaCerradaException;
 import com.gym.gym_management_system.exception.CierreCajaNoEncontradoException;
 import com.gym.gym_management_system.repository.CierreCajaRepository;
+import com.gym.gym_management_system.security.UsuarioActualService;
 import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.LocalDate;
@@ -22,14 +23,17 @@ public class CierreCajaService {
 
     private final CierreCajaRepository cierreRepository;
     private final MovimientoCajaService movimientoCajaService;
+    private final UsuarioActualService usuarioActualService;
     private final Clock reloj;
 
     public CierreCajaService(
             CierreCajaRepository cierreRepository,
             MovimientoCajaService movimientoCajaService,
+            UsuarioActualService usuarioActualService,
             Clock reloj) {
         this.cierreRepository = cierreRepository;
         this.movimientoCajaService = movimientoCajaService;
+        this.usuarioActualService = usuarioActualService;
         this.reloj = reloj;
     }
 
@@ -58,6 +62,7 @@ public class CierreCajaService {
                 request.transferenciasVerificadas().subtract(transferenciasEsperadas));
         cierre.setFechaHoraCierre(LocalDateTime.now(reloj));
         cierre.setObservacion(limpiarTexto(request.observacion()));
+        cierre.setCerradoPor(usuarioActualService.obtenerNombreUsuario());
         return convertirAResponse(cierreRepository.save(cierre));
     }
 
@@ -66,6 +71,7 @@ public class CierreCajaService {
                 .orElseThrow(() -> new CierreCajaNoEncontradoException(fecha));
         cierre.setEstado(EstadoCierreCaja.ABIERTO);
         cierre.setFechaHoraReapertura(LocalDateTime.now(reloj));
+        cierre.setReabiertoPor(usuarioActualService.obtenerNombreUsuario());
         return convertirAResponse(cierreRepository.save(cierre));
     }
 
@@ -106,7 +112,9 @@ public class CierreCajaService {
                 esCero(cierre.getDiferenciaTransferencias()),
                 cierre.getFechaHoraCierre(),
                 cierre.getFechaHoraReapertura(),
-                cierre.getObservacion()
+                cierre.getObservacion(),
+                cierre.getCerradoPor(),
+                cierre.getReabiertoPor()
         );
     }
 

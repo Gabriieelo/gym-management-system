@@ -12,6 +12,8 @@ public record AsistenciaResponse(
         LocalDate fecha,
         LocalDateTime fechaHora,
         ModalidadAcceso modalidad,
-        EstadoAsistencia estado
+        EstadoAsistencia estado,
+        String registradoPor,
+        String anuladoPor
 ) {
 }

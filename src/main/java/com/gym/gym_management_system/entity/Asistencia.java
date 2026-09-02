@@ -43,4 +43,10 @@ public class Asistencia {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private EstadoAsistencia estado;
+
+    @Column(length = 50)
+    private String registradoPor;
+
+    @Column(length = 50)
+    private String anuladoPor;
 }

@@ -68,4 +68,10 @@ public class CierreCaja {
 
     @Column(length = 500)
     private String observacion;
+
+    @Column(length = 50)
+    private String cerradoPor;
+
+    @Column(length = 50)
+    private String reabiertoPor;
 }

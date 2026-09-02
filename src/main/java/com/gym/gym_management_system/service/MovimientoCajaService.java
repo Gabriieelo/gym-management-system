@@ -17,6 +17,7 @@ import com.gym.gym_management_system.exception.CajaYaCerradaException;
 import com.gym.gym_management_system.exception.OperacionCajaInvalidaException;
 import com.gym.gym_management_system.repository.MovimientoCajaRepository;
 import com.gym.gym_management_system.repository.CierreCajaRepository;
+import com.gym.gym_management_system.security.UsuarioActualService;
 import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.LocalDate;
@@ -31,14 +32,17 @@ public class MovimientoCajaService {
 
     private final MovimientoCajaRepository movimientoRepository;
     private final CierreCajaRepository cierreRepository;
+    private final UsuarioActualService usuarioActualService;
     private final Clock reloj;
 
     public MovimientoCajaService(
             MovimientoCajaRepository movimientoRepository,
             CierreCajaRepository cierreRepository,
+            UsuarioActualService usuarioActualService,
             Clock reloj) {
         this.movimientoRepository = movimientoRepository;
         this.cierreRepository = cierreRepository;
+        this.usuarioActualService = usuarioActualService;
         this.reloj = reloj;
     }
 
@@ -53,6 +57,7 @@ public class MovimientoCajaService {
         movimiento.setMedioPago(request.medioPago());
         movimiento.setFechaHora(ahora);
         movimiento.setDescripcion(request.descripcion().trim());
+        movimiento.setRegistradoPor(usuarioActualService.obtenerNombreUsuario());
         return convertirAResponse(movimientoRepository.save(movimiento));
     }
 
@@ -71,6 +76,7 @@ public class MovimientoCajaService {
         movimiento.setFechaHora(pago.getFechaPago());
         movimiento.setDescripcion(describirPago(pago));
         movimiento.setPago(pago);
+        movimiento.setRegistradoPor(pago.getRegistradoPor());
         movimientoRepository.save(movimiento);
     }
 
@@ -83,6 +89,7 @@ public class MovimientoCajaService {
             );
         }
         movimiento.setEstado(EstadoMovimientoCaja.ANULADO);
+        movimiento.setAnuladoPor(usuarioActualService.obtenerNombreUsuario());
         return convertirAResponse(movimientoRepository.save(movimiento));
     }
 
@@ -90,6 +97,7 @@ public class MovimientoCajaService {
         movimientoRepository.findByPagoId(pagoId).ifPresent(movimiento -> {
             validarCajaAbierta(movimiento.getFechaHora().toLocalDate());
             movimiento.setEstado(EstadoMovimientoCaja.ANULADO);
+            movimiento.setAnuladoPor(usuarioActualService.obtenerNombreUsuario());
             movimientoRepository.save(movimiento);
         });
     }
@@ -200,7 +208,9 @@ public class MovimientoCajaService {
                 movimiento.getDescripcion(),
                 pago != null ? pago.getId() : null,
                 cliente != null ? cliente.getId() : null,
-                cliente != null ? cliente.getNombre() + " " + cliente.getApellido() : null
+                cliente != null ? cliente.getNombre() + " " + cliente.getApellido() : null,
+                movimiento.getRegistradoPor(),
+                movimiento.getAnuladoPor()
         );
     }
 }
