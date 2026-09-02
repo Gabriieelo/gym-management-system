@@ -17,7 +17,6 @@ import com.gym.gym_management_system.security.UsuarioActualService;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.YearMonth;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +30,7 @@ public class PagoService {
     private final CalculadorTarifa calculadorTarifa;
     private final MovimientoCajaService movimientoCajaService;
     private final UsuarioActualService usuarioActualService;
+    private final EstadoCuotaService estadoCuotaService;
     private final Clock reloj;
 
     public PagoService(
@@ -39,12 +39,14 @@ public class PagoService {
             CalculadorTarifa calculadorTarifa,
             MovimientoCajaService movimientoCajaService,
             UsuarioActualService usuarioActualService,
+            EstadoCuotaService estadoCuotaService,
             Clock reloj) {
         this.pagoRepository = pagoRepository;
         this.clienteRepository = clienteRepository;
         this.calculadorTarifa = calculadorTarifa;
         this.movimientoCajaService = movimientoCajaService;
         this.usuarioActualService = usuarioActualService;
+        this.estadoCuotaService = estadoCuotaService;
         this.reloj = reloj;
     }
 
@@ -104,16 +106,7 @@ public class PagoService {
 
     @Transactional(readOnly = true)
     public EstadoCuotaResponse consultarCuotaActual(Long clienteId) {
-        buscarCliente(clienteId);
-        YearMonth periodo = YearMonth.now(reloj);
-        boolean pagada = pagoRepository.existsByClienteIdAndTipoAndPeriodoMesAndPeriodoAnioAndEstado(
-                clienteId,
-                TipoPago.MENSUAL,
-                periodo.getMonthValue(),
-                periodo.getYear(),
-                EstadoPago.CONFIRMADO
-        );
-        return new EstadoCuotaResponse(clienteId, periodo, pagada);
+        return estadoCuotaService.consultar(clienteId);
     }
 
     public PagoResponse anular(Long id) {

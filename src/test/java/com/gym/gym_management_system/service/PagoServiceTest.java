@@ -48,6 +48,9 @@ class PagoServiceTest {
     @Mock
     private UsuarioActualService usuarioActualService;
 
+    @Mock
+    private EstadoCuotaService estadoCuotaService;
+
     private PagoService pagoService;
     private Cliente cliente;
 
@@ -60,6 +63,7 @@ class PagoServiceTest {
                 new CalculadorTarifa(),
                 movimientoCajaService,
                 usuarioActualService,
+                estadoCuotaService,
                 reloj
         );
 
